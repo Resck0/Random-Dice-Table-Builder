@@ -1,55 +1,66 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Simulador Random Dice - Biblioteca Completa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Dice Simulator - Build your Board</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .board { display: grid; grid-template-columns: repeat(5, 80px); grid-gap: 8px; background: #16213e; padding: 15px; border-radius: 10px; border: 2px solid #0f3460; }
-        .slot { width: 80px; height: 80px; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+        
+        /* Contenedor principal para que sea responsive */
+        .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; }
+
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #16213e; padding: 15px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; }
+        .slot { aspect-ratio: 1 / 1; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; }
         .slot img { width: 85%; height: 85%; object-fit: contain; }
         .slot.active-lunar { box-shadow: 0 0 15px #00fff2 inset; border: 2px solid #00fff2; }
 
-        .current-deck { display: flex; gap: 10px; margin: 20px 0; padding: 10px; background: #1b1b2f; border-radius: 15px; border: 2px solid #e94560; }
-        .deck-slot { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #444; cursor: pointer; overflow: hidden; background: #0f3460; }
+        .current-deck { display: flex; gap: 8px; margin: 20px 0; padding: 10px; background: #1b1b2f; border-radius: 15px; border: 2px solid #e94560; justify-content: center; width: 100%; }
+        .deck-slot { width: 18%; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid #444; cursor: pointer; overflow: hidden; background: #0f3460; }
         .deck-slot.selected { border-color: #00fff2; transform: scale(1.1); }
         .deck-slot img { width: 100%; height: 100%; object-fit: contain; }
 
         /* Estilos de la Biblioteca */
-        .library-container { width: 100%; max-width: 900px; max-height: 500px; overflow-y: auto; background: #16213e; padding: 20px; border-radius: 10px; }
-        .category-title { color: #ffae00; border-bottom: 1px solid #ffae00; margin: 20px 0 10px; font-weight: bold; text-transform: uppercase; }
+        .library-container { width: 100%; max-height: 400px; overflow-y: auto; background: #16213e; padding: 15px; border-radius: 10px; box-sizing: border-box; }
+        .category-title { color: #ffae00; border-bottom: 1px solid #ffae00; margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
         .Unique-title { color: #ce19ff; border-color: #ce19ff; }
         .Rare-title { color: #00b3ff; border-color: #00b3ff; }
         .Common-title { color: #adadad; border-color: #adadad; }
         .Event-title { color: #ff3e3e; border-color: #ff3e3e; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; }
-        .lib-item { width: 60px; height: 60px; cursor: pointer; background: #0a0a12; border-radius: 5px; border: 1px solid #333; transition: 0.2s; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
+        .lib-item { aspect-ratio: 1 / 1; cursor: pointer; background: #0a0a12; border-radius: 5px; border: 1px solid #333; transition: 0.2s; }
         .lib-item:hover { border-color: #fff; transform: translateY(-3px); }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; }
         
-        button { background: #e94560; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        button { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1em; }
+        h3 { font-size: 1em; text-align: center; color: #ccc; }
     </style>
 </head>
 <body>
 
-    <h2>SIMULADOR DE TABLERO</h2>
-    <div class="board" id="board"></div>
-    <button onclick="resetBoard()" style="margin-top:10px">Limpiar Tablero</button>
+    <div class="container">
+        <h2>DICE BOARD SIMULATOR</h2>
+        
+        <div class="board" id="board"></div>
+        
+        <button onclick="resetBoard()" style="margin-top:15px">Clear Board</button>
 
-    <h3>TU MANO (Elige un hueco y luego un dado de abajo)</h3>
-    <div class="current-deck">
-        <div class="deck-slot selected" onclick="pickSlot(0)"><img id="slot0" src="70px-Lunar_Dice.png" data-type="lunar"></div>
-        <div class="deck-slot" onclick="pickSlot(1)"><img id="slot1" src="70px-Recharge_Dice.png" data-type="recharge"></div>
-        <div class="deck-slot" onclick="pickSlot(2)"><img id="slot2" src="70px-Holy_Sword_Dice.png" data-type="sword"></div>
-        <div class="deck-slot" onclick="pickSlot(3)"><img id="slot3" src="70px-Joker_Dice.png" data-type="joker"></div>
-        <div class="deck-slot" onclick="pickSlot(4)"><img id="slot4" src="70px-Snowball_Dice.png" data-type="snow"></div>
+        <h3>YOUR HAND<br><small>(Select a slot, then a die below)</small></h3>
+        
+        <div class="current-deck">
+            <div class="deck-slot selected" onclick="pickSlot(0)"><img id="slot0" src="70px-Lunar_Dice.png" data-type="lunar"></div>
+            <div class="deck-slot" onclick="pickSlot(1)"><img id="slot1" src="70px-Recharge_Dice.png" data-type="recharge"></div>
+            <div class="deck-slot" onclick="pickSlot(2)"><img id="slot2" src="70px-Holy_Sword_Dice.png" data-type="sword"></div>
+            <div class="deck-slot" onclick="pickSlot(3)"><img id="slot3" src="70px-Joker_Dice.png" data-type="joker"></div>
+            <div class="deck-slot" onclick="pickSlot(4)"><img id="slot4" src="70px-Snowball_Dice.png" data-type="snow"></div>
+        </div>
+
+        <div class="library-container" id="libContainer"></div>
     </div>
 
-    <div class="library-container" id="libContainer"></div>
-
     <script>
-        const dados = {
+        const diceData = {
             "Legendary": [
                 "Nuclear", "Landmine", "Sand_Swamp", "Joker", "Holy_Sword", "Hell", "Shield", "Blizzard", "Growth", "Summoner", 
                 "Solar", "Assassin", "Atomic", "Gun", "Typhoon", "Supplement", "Metastasis", "Time", "Combo", "Lunar", 
@@ -68,15 +79,15 @@
         let activeDieImg = "70px-Lunar_Dice.png";
         let activeType = "lunar";
 
-        // Generar Biblioteca por categorías
+        // Generate Library
         const container = document.getElementById('libContainer');
-        for (const [cat, lista] of Object.entries(dados)) {
+        for (const [cat, list] of Object.entries(diceData)) {
             const section = document.createElement('div');
-            section.innerHTML = `<div class="category-title ${cat}-title">${cat} (${lista.length} dados)</div>`;
+            section.innerHTML = `<div class="category-title ${cat}-title">${cat} (${list.length} dice)</div>`;
             const grid = document.createElement('div');
             grid.className = 'grid';
             
-            lista.forEach(name => {
+            list.forEach(name => {
                 const fileName = `70px-${name}_Dice.png`;
                 const item = document.createElement('div');
                 item.className = 'lib-item';
@@ -94,7 +105,7 @@
             container.appendChild(section);
         }
 
-        // Lógica de Tablero
+        // Board Logic
         const board = document.getElementById('board');
         for (let i = 0; i < 15; i++) {
             const s = document.createElement('div');
