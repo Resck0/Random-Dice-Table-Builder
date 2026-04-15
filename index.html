@@ -45,7 +45,11 @@
         .lib-item:hover { border-color: #fff; transform: translateY(-3px); }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; }
         
-        button { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1em; }
+        /* Layout Controls */
+        .board-controls { display: flex; align-items: center; gap: 15px; margin-top: 15px; }
+        .btn-clear { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1em; }
+        .tip-text { font-size: 0.85em; color: #888; margin: 0; }
+
         h2 { margin: 10px 0; font-size: 1.5em; text-align: center; }
         h3 { font-size: 0.9em; text-align: center; color: #aaa; margin: 5px 0; }
     </style>
@@ -55,7 +59,11 @@
     <div class="container">
         <h2>DICE BOARD SIMULATOR</h2>
         <div class="board" id="board"></div>
-        <button onclick="resetBoard()" style="margin-top:15px">Clear Board</button>
+        
+        <div class="board-controls">
+            <button class="btn-clear" onclick="resetBoard()">Clear Board</button>
+            <p class="tip-text">Tip: Use your phone's screenshot to share!</p>
+        </div>
 
         <h3>YOUR HAND<br><small>(Select a slot, then pick from library)</small></h3>
         <div class="current-deck">
@@ -145,7 +153,6 @@
                     }
                 });
 
-                // Apply buffs only to non-buff dice (optional, following game logic)
                 if (!type.includes('lunar') && hasLunar) s.classList.add('active-lunar');
                 if (!type.includes('scope') && hasScope) s.classList.add('active-scope');
             });
