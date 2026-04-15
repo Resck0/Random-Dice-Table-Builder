@@ -11,11 +11,20 @@
 
         /* Board Styling */
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #16213e; padding: 15px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; }
-        .slot { aspect-ratio: 1 / 1; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; position: relative; }
-        .slot img { width: 85%; height: 85%; object-fit: contain; }
+        .slot { aspect-ratio: 1 / 1; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; position: relative; transition: all 0.2s; }
+        .slot img { width: 85%; height: 85%; object-fit: contain; z-index: 2; }
         
-        /* Lunar Glow - Only for buffed dice */
-        .slot.active-lunar { box-shadow: 0 0 15px #00fff2 inset; border: 2px solid #00fff2; }
+        /* Lunar Glow (Outer Border - Cyan) */
+        .slot.active-lunar { border: 2px solid #00fff2; box-shadow: 0 0 10px #00fff2; }
+        
+        /* Scope Glow (Inner Border - Orange) */
+        .slot.active-scope { border: 2px solid #ffae00; box-shadow: 0 0 10px #ffae00; }
+
+        /* Double Buff (Lunar + Scope) */
+        .slot.active-lunar.active-scope { 
+            border: 2px solid #00fff2; /* Lunar Out */
+            box-shadow: inset 0 0 0 3px #ffae00, 0 0 10px #00fff2; /* Scope In */
+        }
 
         /* Deck / Hand Styling */
         .current-deck { display: flex; gap: 8px; margin: 20px 0; padding: 10px; background: #1b1b2f; border-radius: 15px; border: 2px solid #e94560; justify-content: center; width: 100%; box-sizing: border-box; }
@@ -24,8 +33,8 @@
         .deck-slot img { width: 100%; height: 100%; object-fit: contain; }
 
         /* Library Styling */
-        .library-container { width: 100%; max-height: 450px; overflow-y: auto; background: #16213e; padding: 15px; border-radius: 10px; box-sizing: border-box; }
-        .category-title { color: #ffae00; border-bottom: 1px solid #ffae00; margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; }
+        .library-container { width: 100%; max-height: 400px; overflow-y: auto; background: #16213e; padding: 15px; border-radius: 10px; box-sizing: border-box; }
+        .category-title { color: #ffae00; border-bottom: 1px solid #ffae00; margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; }
         .Unique-title { color: #ce19ff; border-color: #ce19ff; }
         .Rare-title { color: #00b3ff; border-color: #00b3ff; }
         .Common-title { color: #adadad; border-color: #adadad; }
@@ -36,29 +45,23 @@
         .lib-item:hover { border-color: #fff; transform: translateY(-3px); }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; }
         
-        button { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.2s; }
-        button:hover { background: #ff5d78; }
-        
+        button { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1em; }
         h2 { margin: 10px 0; font-size: 1.5em; text-align: center; }
         h3 { font-size: 0.9em; text-align: center; color: #aaa; margin: 5px 0; }
-        small { color: #777; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>DICE BOARD SIMULATOR</h2>
-        
         <div class="board" id="board"></div>
-        
         <button onclick="resetBoard()" style="margin-top:15px">Clear Board</button>
 
-        <h3>YOUR HAND<br><small>(Select a slot, then pick a die from the library)</small></h3>
-        
+        <h3>YOUR HAND<br><small>(Select a slot, then pick from library)</small></h3>
         <div class="current-deck">
             <div class="deck-slot selected" onclick="pickSlot(0)"><img id="slot0" src="70px-Lunar_Dice.png" data-type="lunar"></div>
             <div class="deck-slot" onclick="pickSlot(1)"><img id="slot1" src="70px-Recharge_Dice.png" data-type="recharge"></div>
-            <div class="deck-slot" onclick="pickSlot(2)"><img id="slot2" src="70px-Holy_Sword_Dice.png" data-type="sword"></div>
+            <div class="deck-slot" onclick="pickSlot(2)"><img id="slot2" src="70px-Scope_Dice.png" data-type="scope"></div>
             <div class="deck-slot" onclick="pickSlot(3)"><img id="slot3" src="70px-Joker_Dice.png" data-type="joker"></div>
             <div class="deck-slot" onclick="pickSlot(4)"><img id="slot4" src="70px-Snowball_Dice.png" data-type="snow"></div>
         </div>
@@ -68,32 +71,21 @@
 
     <script>
         const diceData = {
-            "Legendary": [
-                "Nuclear", "Landmine", "Sand_Swamp", "Joker", "Holy_Sword", "Hell", "Shield", "Blizzard", "Growth", "Summoner", 
-                "Solar", "Assassin", "Atomic", "Gun", "Typhoon", "Supplement", "Metastasis", "Time", "Combo", "Lunar", 
-                "Flow", "Star", "Ix10", "Silence", "Royal", "YinYang", "Scope", "Bubble", "Guardian", "Overheat", 
-                "Earthquake", "Timewinder", "Recharge", "Compression", "Lighting_Cloud", "Storm", "Ignition", "Gravity", "Rage", "Reverse", 
-                "Tsunami", "Phantom_Thief", "Predator", "Dimension", "Soul", "Satellite_Strike", "Devil_Sword", "Variable", "Giga_Switch", "Echo", 
-                "Monolith", "Forging", "Volcano", "Sealing", "Bastion", "Distortion", "Medusa"
-            ],
+            "Legendary": ["Nuclear", "Landmine", "Sand_Swamp", "Joker", "Holy_Sword", "Hell", "Shield", "Blizzard", "Growth", "Summoner", "Solar", "Assassin", "Atomic", "Gun", "Typhoon", "Supplement", "Metastasis", "Time", "Combo", "Lunar", "Flow", "Star", "Ix10", "Silence", "Royal", "YinYang", "Scope", "Bubble", "Guardian", "Overheat", "Earthquake", "Timewinder", "Recharge", "Compression", "Lighting_Cloud", "Storm", "Ignition", "Gravity", "Rage", "Reverse", "Tsunami", "Phantom_Thief", "Predator", "Dimension", "Soul", "Satellite_Strike", "Devil_Sword", "Variable", "Giga_Switch", "Echo", "Monolith", "Forging", "Volcano", "Sealing", "Bastion", "Distortion", "Medusa"],
             "Unique": ["Death", "Teleport", "Laser", "Mimic", "Infect", "Modified_Electric", "Absorb", "Mighty_Wind", "Switch", "Gear", "Wave", "Flame", "Healing", "Clone", "Cracked_Growth", "Rock", "Bounty", "Speed_Gun", "Berserker", "Snowball", "Whim", "Pinball", "Solitude", "Exhaust", "Barrier"],
             "Rare": ["Mine", "Light", "Thorn", "Crack", "Critical", "Energy", "Sacrifice", "Arrow", "Random_Growth", "Slingshot", "Sword", "Smite"],
             "Common": ["Fire", "Electric", "Wind", "Poison", "Ice", "Iron", "Broken", "Gamble", "Lock"],
             "Event": ["Gift", "1st_Anniversary", "Lucky_Bag", "Empty_Gift"]
         };
 
-        let selectedSlot = 0;
-        let activeDieImg = "70px-Lunar_Dice.png";
-        let activeType = "lunar";
+        let selectedSlot = 0, activeDieImg = "70px-Lunar_Dice.png", activeType = "lunar";
 
-        // Generate Library Sections
+        // Generate Library
         const container = document.getElementById('libContainer');
         for (const [cat, list] of Object.entries(diceData)) {
             const section = document.createElement('div');
             section.innerHTML = `<div class="category-title ${cat}-title">${cat} (${list.length} dice)</div>`;
-            const grid = document.createElement('div');
-            grid.className = 'grid';
-            
+            const grid = document.createElement('div'); grid.className = 'grid';
             list.forEach(name => {
                 const fileName = `70px-${name}_Dice.png`;
                 const item = document.createElement('div');
@@ -101,29 +93,22 @@
                 item.innerHTML = `<img src="${fileName}" title="${name.replace(/_/g, ' ')}" onerror="this.parentElement.style.opacity='0.2'">`;
                 item.onclick = () => {
                     const deckImg = document.getElementById(`slot${selectedSlot}`);
-                    deckImg.src = fileName;
-                    deckImg.dataset.type = name.toLowerCase();
-                    activeDieImg = fileName;
-                    activeType = name.toLowerCase();
+                    deckImg.src = fileName; deckImg.dataset.type = name.toLowerCase();
+                    activeDieImg = fileName; activeType = name.toLowerCase();
                 };
                 grid.appendChild(item);
             });
-            section.appendChild(grid);
-            container.appendChild(section);
+            section.appendChild(grid); container.appendChild(section);
         }
 
-        // Initialize 15 slots board (3x5)
+        // Initialize Board
         const board = document.getElementById('board');
         for (let i = 0; i < 15; i++) {
-            const s = document.createElement('div');
-            s.className = 'slot';
+            const s = document.createElement('div'); s.className = 'slot';
             s.onclick = () => {
-                if (s.innerHTML.includes(activeDieImg)) {
-                    s.innerHTML = '';
-                } else {
-                    s.innerHTML = `<img src="${activeDieImg}" data-type="${activeType}">`;
-                }
-                checkLunas();
+                if (s.innerHTML.includes(activeDieImg)) s.innerHTML = '';
+                else s.innerHTML = `<img src="${activeDieImg}" data-type="${activeType}">`;
+                updateBuffs();
             };
             board.appendChild(s);
         }
@@ -131,53 +116,43 @@
         function pickSlot(i) {
             selectedSlot = i;
             const img = document.getElementById(`slot${i}`);
-            activeDieImg = img.src;
-            activeType = img.dataset.type || "lunar";
+            activeDieImg = img.src; activeType = img.dataset.type || "lunar";
             document.querySelectorAll('.deck-slot').forEach((s, idx) => s.classList.toggle('selected', idx === i));
         }
 
-        function checkLunas() {
+        function updateBuffs() {
             const slots = document.querySelectorAll('.slot');
             slots.forEach(s => {
-                s.classList.remove('active-lunar');
+                s.classList.remove('active-lunar', 'active-scope');
                 const img = s.querySelector('img');
-                
-                // If the slot has a die and it is NOT a Lunar Die
-                if (img && !img.dataset.type.includes('lunar')) {
-                    const idx = Array.from(slots).indexOf(s);
-                    const r = Math.floor(idx / 5); // Row (0-2)
-                    const c = idx % 5;             // Column (0-4)
-                    
-                    let isBuffed = false;
-                    
-                    // Cross directions only: Up, Down, Left, Right
-                    const neighbors = [
-                        { dr: -1, dc: 0 }, { dr: 1, dc: 0 }, 
-                        { dr: 0, dc: -1 }, { dr: 0, dc: 1 }
-                    ];
+                if (!img) return;
 
-                    neighbors.forEach(pos => {
-                        const nr = r + pos.dr;
-                        const nc = c + pos.dc;
+                const type = img.dataset.type;
+                const idx = Array.from(slots).indexOf(s);
+                const r = Math.floor(idx / 5), c = idx % 5;
+                const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
 
-                        if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
-                            const neighborImg = slots[nr * 5 + nc].querySelector('img');
-                            if (neighborImg && neighborImg.dataset.type.includes('lunar')) {
-                                isBuffed = true;
-                            }
+                let hasLunar = false, hasScope = false;
+
+                neighbors.forEach(pos => {
+                    const nr = r + pos.dr, nc = c + pos.dc;
+                    if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
+                        const nImg = slots[nr * 5 + nc].querySelector('img');
+                        if (nImg) {
+                            if (nImg.dataset.type.includes('lunar')) hasLunar = true;
+                            if (nImg.dataset.type.includes('scope')) hasScope = true;
                         }
-                    });
+                    }
+                });
 
-                    if (isBuffed) s.classList.add('active-lunar');
-                }
+                // Apply buffs only to non-buff dice (optional, following game logic)
+                if (!type.includes('lunar') && hasLunar) s.classList.add('active-lunar');
+                if (!type.includes('scope') && hasScope) s.classList.add('active-scope');
             });
         }
 
         function resetBoard() { 
-            document.querySelectorAll('.slot').forEach(s => { 
-                s.innerHTML = ''; 
-                s.classList.remove('active-lunar'); 
-            }); 
+            document.querySelectorAll('.slot').forEach(s => { s.innerHTML = ''; s.classList.remove('active-lunar', 'active-scope'); }); 
         }
     </script>
 </body>
