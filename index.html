@@ -8,42 +8,38 @@
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
         .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; }
         
-        /* Update Info Styling */
         .last-update { font-size: 0.75em; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Board Styling */
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; background: #16213e; padding: 25px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; }
         .slot { aspect-ratio: 1 / 1; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; position: relative; transition: all 0.2s; }
         .slot img { width: 85%; height: 85%; object-fit: contain; z-index: 5; }
         
-        /* Deck / Hand Styling */
         .current-deck { display: flex; gap: 8px; margin: 20px 0; padding: 10px; background: #1b1b2f; border-radius: 15px; border: 2px solid #e94560; justify-content: center; width: 100%; box-sizing: border-box; }
         .deck-slot { width: 18%; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid #444; cursor: pointer; overflow: hidden; background: #0f3460; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .deck-slot.selected { border-color: #00fff2; transform: scale(1.1); box-shadow: 0 0 10px #00fff2; }
         .deck-slot img { width: 100%; height: 100%; object-fit: contain; }
         
-        /* Search Styling */
-        .search-wrapper { width: 100%; margin: 15px 0 10px; position: relative; }
-        .search-input { width: 100%; padding: 12px 15px; background: #1b1b2f; border: 1px solid #00b3ff; border-radius: 8px; color: white; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 0.9em; }
-        .search-input:focus { box-shadow: 0 0 15px rgba(0, 179, 255, 0.4); border-color: #00fff2; }
-
-        /* Library Styling */
+        /* Library & Search */
+        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #00b3ff; background: #1b1b2f; color: white; font-size: 1em; box-sizing: border-box; }
         .library-container { width: 100%; max-height: 400px; overflow-y: auto; background: #16213e; padding: 15px; border-radius: 10px; box-sizing: border-box; }
-        .category-title { color: #ffae00; border-bottom: 1px solid #ffae00; margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; }
+        
+        /* Category Colors */
+        .cat-legendary { color: #ffae00; border-bottom: 1px solid #ffae00; }
+        .cat-unique { color: #ffb7ce; border-bottom: 1px solid #ffb7ce; }
+        .cat-rare { color: #87ceeb; border-bottom: 1px solid #87ceeb; }
+        .cat-common { color: #ffffff; border-bottom: 1px solid #ffffff; }
+
+        .category-title { margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
         .lib-item { aspect-ratio: 1 / 1; cursor: pointer; background: #0a0a12; border-radius: 5px; border: 1px solid #333; transition: 0.2s; }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; }
         
-        /* Controls */
-        .board-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px; width: 100%; }
+        .board-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 15px 0; width: 100%; }
         .btn-clear { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .tip-text { font-size: 0.8em; color: #888; margin: 0; text-align: center; line-height: 1.4; }
+        .btn-share { background: #00b3ff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* Footer & Info Section */
         .footer-info { margin-top: 25px; padding: 20px; background: #1b1b2f; border-radius: 10px; border-top: 3px solid #00b3ff; width: 100%; box-sizing: border-box; font-size: 0.9em; line-height: 1.6; }
-        .footer-info h4 { margin-top: 0; margin-bottom: 10px; }
         .footer-info a { color: #00b3ff; text-decoration: none; font-weight: bold; }
-        .footer-info a:hover { text-decoration: underline; }
 
         h2 { margin: 10px 0; font-size: 1.5em; text-align: center; }
         h3 { font-size: 0.9em; text-align: center; color: #aaa; margin: 5px 0; }
@@ -53,35 +49,28 @@
 
     <div class="container">
         <h2>DICE BOARD SIMULATOR</h2>
-        
-        <div class="last-update" id="update-date">Checking for updates...</div>
+        <div class="last-update" id="update-date">...</div>
 
         <div class="board" id="board"></div>
         
         <div class="board-controls">
+            <button class="btn-share" onclick="copyShareLink()">📋 Copy Share Link</button>
             <button class="btn-clear" onclick="resetBoard()">Clear Board</button>
-            <div class="tip-text">
-                Phone: Just take a screenshot<br>
-                PC: Windows + Shift + S (drag for make a square) for take a screenshot
-            </div>
         </div>
 
         <h3>YOUR HAND</h3>
         <div class="current-deck" id="playerHand"></div>
         
-        <div class="search-wrapper">
-            <input type="text" id="diceSearch" class="search-input" placeholder="🔍 Search dice by name..." oninput="filterDice()">
-        </div>
-
+        <input type="text" class="search-box" id="diceSearch" placeholder="🔍 Search dice by name..." oninput="filterDice()">
+        
         <div class="library-container" id="libContainer"></div>
 
         <div class="footer-info">
             <div style="margin-bottom: 20px;">
                 <h4 style="color: #ffae00;">🛠️ Troubleshooting / Solución de Problemas</h4>
-                <p><strong>EN:</strong> If images are missing or effects fail, please <strong>Clear Cache</strong> or open in <strong>Incognito Mode</strong>. Due to security, manual <strong>screenshots</strong> are the best way to share!</p>
-                <p><strong>ES:</strong> Si faltan imágenes o fallan los efectos, por favor <strong>Limpia el Caché</strong> o abre en <strong>Modo Incógnito</strong>. ¡Por seguridad, las <strong>capturas de pantalla</strong> son la mejor forma de compartir!</p>
+                <p><strong>EN:</strong> If images are missing or effects fail, please <strong>Clear Cache</strong> or open in <strong>Incognito Mode</strong>. Manual <strong>screenshots</strong> are also a great way to share!</p>
+                <p><strong>ES:</strong> Si faltan imágenes o fallan los efectos, por favor <strong>Limpia el Caché</strong> o abre en <strong>Modo Incógnito</strong>. ¡Las <strong>capturas de pantalla</strong> son una excelente forma de compartir!</p>
             </div>
-
             <div style="margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px;">
                 <h4 style="color: #00fff2;">💬 Contact & Feedback</h4>
                 <p>Bugs, suggestions or recommendations? Let me know!</p>
@@ -90,26 +79,21 @@
                     <span style="color: #ce19ff; font-weight: bold;">Discord: rescooo</span>
                 </p>
             </div>
-
             <div style="border-top: 1px solid #333; padding-top: 15px;">
                 <h4 style="color: #e94560;">❤️ Special Thanks / Agradecimientos</h4>
-                <p>Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> for the support and for sharing this tool with the community and my support <strong>mathanmuoi</strong>! ¡Mil gracias por el apoyo!</p>
+                <p>Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> and <strong>mathanmuoi</strong>! ¡Mil gracias por el apoyo!</p>
             </div>
         </div>
     </div>
 
     <script>
-        function setLastUpdate() {
-            const dateElement = document.getElementById('update-date');
-            const lastMod = new Date(document.lastModified);
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
-            dateElement.innerText = "Last Updated: " + lastMod.toLocaleDateString('en-US', options);
-        }
-
-        const diceRoles = {
-            shooters: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa"],
-            damage: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa", "light"]
+        const idMap = {
+            "Nuclear": "nu", "Landmine": "lm", "Sand_Swamp": "ss", "Joker": "jk", "Holy_Sword": "hs", "Hell": "he", "Shield": "sh", "Blizzard": "bl", "Growth": "gr", "Summoner": "su", "Solar": "so", "Assassin": "as", "Atomic": "at", "Gun": "gu", "Typhoon": "ty", "Supplement": "sp", "Metastasis": "mt", "Time": "ti", "Combo": "co", "Lunar": "lu", "Flow": "fl", "Star": "st", "Ix10": "ix", "Silence": "sl", "Royal": "ro", "YinYang": "yy", "Scope": "sc", "Bubble": "bb", "Guardian": "gd", "Overheat": "oh", "Earthquake": "eq", "Timewinder": "tw", "Recharge": "rc", "Compression": "cp", "Lighting_Cloud": "lc", "Storm": "sm", "Ignition": "ig", "Gravity": "gv", "Rage": "rg", "Reverse": "rv", "Tsunami": "ts", "Phantom_Thief": "pt", "Predator": "pd", "Dimension": "di", "Soul": "sl", "Satellite_Strike": "sk", "Devil_Sword": "ds", "Variable": "va", "Giga_Switch": "gs", "Echo": "ec", "Monolith": "mo", "Forging": "fg", "Volcano": "vo", "Sealing": "sn", "Bastion": "ba", "Distortion": "dt", "Medusa": "me",
+            "Death": "de", "Teleport": "tp", "Laser": "la", "Mimic": "mi", "Infect": "in", "Modified_Electric": "me", "Absorb": "ab", "Mighty_Wind": "mw", "Switch": "sw", "Gear": "ge", "Wave": "wa", "Flame": "fm", "Healing": "hl", "Clone": "cl", "Cracked_Growth": "cg", "Rock": "rk", "Bounty": "bo", "Speed_Gun": "sg", "Berserker": "bk", "Snowball": "sb", "Whim": "wm", "Pinball": "pb", "Solitude": "sd", "Exhaust": "ex", "Barrier": "br",
+            "Mine": "mn", "Light": "li", "Thorn": "th", "Crack": "cr", "Critical": "ci", "Energy": "en", "Sacrifice": "sa", "Arrow": "ar", "Random_Growth": "rg", "Slingshot": "sl", "Sword": "sw", "Smite": "si",
+            "Fire": "fi", "Electric": "el", "Wind": "wi", "Poison": "po", "Ice": "ic", "Iron": "ir", "Broken": "bk", "Gamble": "ga", "Lock": "lo"
         };
+        const revMap = Object.fromEntries(Object.entries(idMap).map(([k, v]) => [v, k.toLowerCase()]));
 
         const diceData = {
             "Legendary": ["Nuclear", "Landmine", "Sand_Swamp", "Joker", "Holy_Sword", "Hell", "Shield", "Blizzard", "Growth", "Summoner", "Solar", "Assassin", "Atomic", "Gun", "Typhoon", "Supplement", "Metastasis", "Time", "Combo", "Lunar", "Flow", "Star", "Ix10", "Silence", "Royal", "YinYang", "Scope", "Bubble", "Guardian", "Overheat", "Earthquake", "Timewinder", "Recharge", "Compression", "Lighting_Cloud", "Storm", "Ignition", "Gravity", "Rage", "Reverse", "Tsunami", "Phantom_Thief", "Predator", "Dimension", "Soul", "Satellite_Strike", "Devil_Sword", "Variable", "Giga_Switch", "Echo", "Monolith", "Forging", "Volcano", "Sealing", "Bastion", "Distortion", "Medusa"],
@@ -118,61 +102,51 @@
             "Common": ["Fire", "Electric", "Wind", "Poison", "Ice", "Iron", "Broken", "Gamble", "Lock"]
         };
 
+        const diceRoles = {
+            shooters: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa"],
+            damage: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa", "light"]
+        };
+
         let selectedSlot = 0, activeDieImg = "", activeType = "";
 
-        // UI Hand Setup
-        const handUI = document.getElementById('playerHand');
+        // UI Hand
         for(let i = 0; i < 5; i++) {
             const div = document.createElement('div');
             div.className = `deck-slot ${i === 0 ? 'selected' : ''}`;
             div.onclick = () => pickSlot(i);
             div.innerHTML = `<img id="slot${i}" src="" data-type="" style="display:none">`;
-            handUI.appendChild(div);
+            document.getElementById('playerHand').appendChild(div);
         }
 
-        // Library Generation
-        const libContainer = document.getElementById('libContainer');
-        for (const [cat, list] of Object.entries(diceData)) {
-            const section = document.createElement('div');
-            section.className = 'category-section';
-            section.innerHTML = `<div class="category-title">${cat}</div>`;
-            const grid = document.createElement('div'); grid.className = 'grid';
-            list.forEach(name => {
-                const fileName = `70px-${name}_Dice.png`;
-                const item = document.createElement('div');
-                item.className = 'lib-item';
-                item.innerHTML = `<img src="${fileName}" title="${name.replace(/_/g, ' ')}">`;
-                item.onclick = () => {
-                    const deckImg = document.getElementById(`slot${selectedSlot}`);
-                    deckImg.src = fileName; deckImg.dataset.type = name.toLowerCase();
-                    deckImg.style.display = "block";
-                    activeDieImg = fileName; activeType = name.toLowerCase();
-                };
-                grid.appendChild(item);
-            });
-            section.appendChild(grid); libContainer.appendChild(section);
+        // UI Library
+        function buildLibrary() {
+            const lib = document.getElementById('libContainer');
+            lib.innerHTML = '';
+            for (const [cat, list] of Object.entries(diceData)) {
+                const catClass = `cat-${cat.toLowerCase()}`;
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                section.innerHTML = `<div class="category-title ${catClass}">${cat}</div>`;
+                const grid = document.createElement('div'); grid.className = 'grid';
+                
+                list.forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'lib-item';
+                    item.dataset.name = name.toLowerCase();
+                    item.innerHTML = `<img src="70px-${name}_Dice.png" title="${name}">`;
+                    item.onclick = () => {
+                        const slot = document.getElementById(`slot${selectedSlot}`);
+                        slot.src = `70px-${name}_Dice.png`; slot.dataset.type = name.toLowerCase();
+                        slot.style.display = "block";
+                        activeDieImg = slot.src; activeType = name.toLowerCase();
+                    };
+                    grid.appendChild(item);
+                });
+                section.appendChild(grid); lib.appendChild(section);
+            }
         }
 
-        // Search Function
-        function filterDice() {
-            const term = document.getElementById('diceSearch').value.toLowerCase();
-            const items = document.querySelectorAll('.lib-item');
-            const sections = document.querySelectorAll('.category-section');
-
-            items.forEach(item => {
-                const name = item.querySelector('img').title.toLowerCase();
-                item.style.display = name.includes(term) ? "block" : "none";
-            });
-
-            // Hide titles if no dice match in that category
-            sections.forEach(section => {
-                const hasVisible = Array.from(section.querySelectorAll('.lib-item')).some(i => i.style.display !== "none");
-                section.style.display = hasVisible ? "block" : "none";
-            });
-        }
-
-        // Board Generation
-        const board = document.getElementById('board');
+        // UI Board
         for (let i = 0; i < 15; i++) {
             const s = document.createElement('div'); s.className = 'slot';
             s.onclick = () => {
@@ -181,7 +155,18 @@
                 else s.innerHTML = `<img src="${activeDieImg}" data-type="${activeType}">`;
                 updateBuffs();
             };
-            board.appendChild(s);
+            document.getElementById('board').appendChild(s);
+        }
+
+        function filterDice() {
+            const query = document.getElementById('diceSearch').value.toLowerCase();
+            document.querySelectorAll('.lib-item').forEach(item => {
+                item.style.display = item.dataset.name.includes(query) ? "block" : "none";
+            });
+            document.querySelectorAll('.category-section').forEach(sec => {
+                const hasVisible = Array.from(sec.querySelectorAll('.lib-item')).some(i => i.style.display !== "none");
+                sec.style.display = hasVisible ? "block" : "none";
+            });
         }
 
         function pickSlot(i) {
@@ -197,64 +182,79 @@
                 s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed";
                 const img = s.querySelector('img');
                 if (!img) return;
-
                 const type = img.dataset.type;
                 const idx = Array.from(slots).indexOf(s);
                 const r = Math.floor(idx / 5), c = idx % 5;
                 const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
-                let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, totalNeighbors: 0 };
-
-                neighbors.forEach(pos => {
-                    const nr = r + pos.dr, nc = c + pos.dc;
+                let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, total: 0 };
+                neighbors.forEach(p => {
+                    const nr = r + p.dr, nc = c + p.dc;
                     if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
-                        const nImg = slots[nr * 5 + nc].querySelector('img');
-                        if (nImg) {
-                            const nt = nImg.dataset.type;
-                            b.totalNeighbors++;
-                            if (nt.includes('lunar')) b.lunar++;
-                            if (nt.includes('scope')) b.scope++;
-                            if (nt.includes('hell')) b.hell++;
-                            if (nt.includes('critical')) b.crit++;
-                            if (nt.includes('light')) b.light++;
-                            if (nt.includes('bastion')) b.bastion++;
+                        const nI = slots[nr * 5 + nc].querySelector('img');
+                        if (nI) {
+                            const nt = nI.dataset.type; b.total++;
+                            if (nt.includes('lunar')) b.lunar++; if (nt.includes('scope')) b.scope++;
+                            if (nt.includes('hell')) b.hell++; if (nt.includes('critical')) b.crit++;
+                            if (nt.includes('light')) b.light++; if (nt.includes('bastion')) b.bastion++;
                         }
                     }
                 });
-
-                const isShooter = diceRoles.shooters.includes(type);
-                const isDamager = diceRoles.damage.includes(type);
-                let activeBuffs = [];
-
-                if (type.includes('bastion') && b.totalNeighbors > 0) activeBuffs.push({id: 3, color: '#c4a484'});
-                if (!type.includes('bastion') && b.bastion > 0) activeBuffs.push({id: 3, color: '#c4a484'});
-                if (!type.includes('lunar') && isShooter && b.lunar > 0) activeBuffs.push({id: 1, color: '#00fff2'});
-                if (!type.includes('scope') && isShooter && b.scope > 0) activeBuffs.push({id: 2, color: '#ff0000'});
-                if (!type.includes('lunar') && !type.includes('scope') && isDamager && b.hell > 0) activeBuffs.push({id: 4, color: '#999999'});
-                if (!type.includes('lunar') && !type.includes('scope') && !type.includes('critical') && isDamager && b.crit > 0) activeBuffs.push({id: 5, color: '#ffae00'});
-                if (!type.includes('lunar') && !type.includes('scope') && isDamager && b.light > 0) activeBuffs.push({id: 6, color: '#ffff00'});
-
-                if (activeBuffs.length > 0) {
-                    s.style.borderStyle = "solid";
-                    activeBuffs.sort((a, b) => a.id - b.id);
-                    s.style.borderColor = activeBuffs[0].color;
-                    let shadowList = [];
-                    activeBuffs.forEach((buff, i) => {
-                        if (i === 0) shadowList.push(`0 0 10px ${buff.color}`);
-                        else shadowList.push(`inset 0 0 ${12 - (i * 2)}px ${buff.color}`);
-                    });
-                    s.style.boxShadow = shadowList.join(", ");
+                const isS = diceRoles.shooters.includes(type), isD = diceRoles.damage.includes(type);
+                let buffs = [];
+                if ((type.includes('bastion') && b.total > 0) || b.bastion > 0) buffs.push({id: 3, color: '#c4a484'});
+                if (!type.includes('lunar') && isS && b.lunar > 0) buffs.push({id: 1, color: '#00fff2'});
+                if (!type.includes('scope') && isS && b.scope > 0) buffs.push({id: 2, color: '#ff0000'});
+                if (!type.includes('lunar') && !type.includes('scope') && isD && b.hell > 0) buffs.push({id: 4, color: '#999999'});
+                if (!type.includes('lunar') && !type.includes('scope') && !type.includes('critical') && isD && b.crit > 0) buffs.push({id: 5, color: '#ffae00'});
+                if (!type.includes('lunar') && !type.includes('scope') && isD && b.light > 0) buffs.push({id: 6, color: '#ffff00'});
+                if (buffs.length > 0) {
+                    s.style.borderStyle = "solid"; buffs.sort((a,b)=>a.id-b.id);
+                    s.style.borderColor = buffs[0].color;
+                    s.style.boxShadow = buffs.map((bu, i) => i === 0 ? `0 0 10px ${bu.color}` : `inset 0 0 ${12-(i*2)}px ${bu.color}`).join(", ");
                 }
             });
         }
 
-        function resetBoard() { 
-            document.querySelectorAll('.slot').forEach(s => { 
-                s.innerHTML = ''; s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed"; 
-            }); 
+        function copyShareLink() {
+            const h = [], l = [];
+            for(let i=0; i<5; i++) h.push(idMap[Object.keys(idMap).find(k => k.toLowerCase() === document.getElementById(`slot${i}`).dataset.type)] || "");
+            document.querySelectorAll('.slot').forEach(s => l.push(idMap[Object.keys(idMap).find(k => k.toLowerCase() === s.querySelector('img')?.dataset.type)] || ""));
+            const url = new URL(window.location.href);
+            url.searchParams.set('b', h.join('.') + '|' + l.join('.'));
+            navigator.clipboard.writeText(url.href).then(() => alert("Link Copied!"));
+        }
+
+        function loadFromUrl() {
+            const bData = new URLSearchParams(window.location.search).get('b');
+            if (!bData) return;
+            const [hPart, lPart] = bData.split('|');
+            const hIds = hPart.split('.'), lIds = lPart.split('.'), slots = document.querySelectorAll('.slot');
+            hIds.forEach((id, i) => {
+                if(revMap[id]) {
+                    const img = document.getElementById(`slot${i}`);
+                    img.src = `70px-${revMap[id].charAt(0).toUpperCase() + revMap[id].slice(1).replace(/_/g, '_')}_Dice.png`;
+                    img.dataset.type = revMap[id]; img.style.display = "block";
+                }
+            });
+            lIds.forEach((id, i) => {
+                if(revMap[id]) {
+                    const name = revMap[id].charAt(0).toUpperCase() + revMap[id].slice(1).replace(/_/g, '_');
+                    slots[i].innerHTML = `<img src="70px-${name}_Dice.png" data-type="${revMap[id]}">`;
+                }
+            });
             updateBuffs();
         }
 
-        window.onload = setLastUpdate;
+        function resetBoard() { document.querySelectorAll('.slot').forEach(s => { s.innerHTML = ''; s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed"; }); updateBuffs(); }
+        
+        window.onload = () => { 
+            buildLibrary(); 
+            loadFromUrl(); 
+            const lastMod = new Date(document.lastModified);
+            // Formato: Mes escrito en inglés, día, año, hora:minutos (24h)
+            const options = { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+            document.getElementById('update-date').innerText = "Last Updated: " + lastMod.toLocaleString('en-US', options);
+        };
     </script>
 </body>
 </html>
