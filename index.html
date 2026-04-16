@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Dice Board Simulator</title>
+    <title>Random Dice Board Simulator - Full Version</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
         .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; }
-        
         .last-update { font-size: 0.75em; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
 
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; background: #16213e; padding: 25px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; }
@@ -101,6 +100,11 @@
             "Common": ["Fire", "Electric", "Wind", "Poison", "Ice", "Iron", "Broken", "Gamble", "Lock"]
         };
 
+        const diceRoles = {
+            shooters: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa"],
+            damage: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa", "light"]
+        };
+
         let selectedSlot = 0, activeDieImg = "", activeDieName = "";
 
         // Crear Mano
@@ -152,6 +156,7 @@
                 } else {
                     s.innerHTML = `<img src="${activeDieImg}" data-name="${activeDieName}">`;
                 }
+                updateBuffs();
             };
             board.appendChild(s);
         }
@@ -172,6 +177,48 @@
             document.querySelectorAll('.category-section').forEach(sec => {
                 const hasVisible = Array.from(sec.querySelectorAll('.lib-item')).some(i => i.style.display !== "none");
                 sec.style.display = hasVisible ? "block" : "none";
+            });
+        }
+
+        function updateBuffs() {
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach(s => {
+                s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed";
+                const img = s.querySelector('img');
+                if (!img) return;
+                const type = img.dataset.name.toLowerCase();
+                const idx = Array.from(slots).indexOf(s);
+                const r = Math.floor(idx / 5), c = idx % 5;
+                const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
+                let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, total: 0 };
+                
+                neighbors.forEach(p => {
+                    const nr = r + p.dr, nc = c + p.dc;
+                    if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
+                        const nI = slots[nr * 5 + nc].querySelector('img');
+                        if (nI) {
+                            const nt = nI.dataset.name.toLowerCase(); b.total++;
+                            if (nt.includes('lunar')) b.lunar++; if (nt.includes('scope')) b.scope++;
+                            if (nt.includes('hell')) b.hell++; if (nt.includes('critical')) b.crit++;
+                            if (nt.includes('light')) b.light++; if (nt.includes('bastion')) b.bastion++;
+                        }
+                    }
+                });
+
+                const isS = diceRoles.shooters.includes(type), isD = diceRoles.damage.includes(type);
+                let buffs = [];
+                if ((type.includes('bastion') && b.total > 0) || b.bastion > 0) buffs.push({id: 3, color: '#c4a484'});
+                if (!type.includes('lunar') && isS && b.lunar > 0) buffs.push({id: 1, color: '#00fff2'});
+                if (!type.includes('scope') && isS && b.scope > 0) buffs.push({id: 2, color: '#ff0000'});
+                if (!type.includes('lunar') && !type.includes('scope') && isD && b.hell > 0) buffs.push({id: 4, color: '#999999'});
+                if (!type.includes('lunar') && !type.includes('scope') && !type.includes('critical') && isD && b.crit > 0) buffs.push({id: 5, color: '#ffae00'});
+                if (!type.includes('lunar') && !type.includes('scope') && isD && b.light > 0) buffs.push({id: 6, color: '#ffff00'});
+                
+                if (buffs.length > 0) {
+                    s.style.borderStyle = "solid"; buffs.sort((a,b)=>a.id-b.id);
+                    s.style.borderColor = buffs[0].color;
+                    s.style.boxShadow = buffs.map((bu, i) => i === 0 ? `0 0 10px ${bu.color}` : `inset 0 0 ${12-(i*2)}px ${bu.color}`).join(", ");
+                }
             });
         }
 
@@ -211,9 +258,10 @@
                     slots[i].innerHTML = `<img src="70px-${name}_Dice.png" data-name="${name}">`;
                 }
             });
+            updateBuffs();
         }
 
-        function resetBoard() { document.querySelectorAll('.slot').forEach(s => s.innerHTML = ''); }
+        function resetBoard() { document.querySelectorAll('.slot').forEach(s => { s.innerHTML = ''; s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed"; }); }
 
         window.onload = () => {
             buildLibrary(); 
