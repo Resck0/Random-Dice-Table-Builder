@@ -22,6 +22,11 @@
         .deck-slot.selected { border-color: #00fff2; transform: scale(1.1); box-shadow: 0 0 10px #00fff2; }
         .deck-slot img { width: 100%; height: 100%; object-fit: contain; }
         
+        /* Search Styling */
+        .search-wrapper { width: 100%; margin: 15px 0 10px; position: relative; }
+        .search-input { width: 100%; padding: 12px 15px; background: #1b1b2f; border: 1px solid #00b3ff; border-radius: 8px; color: white; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 0.9em; }
+        .search-input:focus { box-shadow: 0 0 15px rgba(0, 179, 255, 0.4); border-color: #00fff2; }
+
         /* Library Styling */
         .library-container { width: 100%; max-height: 400px; overflow-y: auto; background: #16213e; padding: 15px; border-radius: 10px; box-sizing: border-box; }
         .category-title { color: #ffae00; border-bottom: 1px solid #ffae00; margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; }
@@ -64,6 +69,10 @@
         <h3>YOUR HAND</h3>
         <div class="current-deck" id="playerHand"></div>
         
+        <div class="search-wrapper">
+            <input type="text" id="diceSearch" class="search-input" placeholder="🔍 Search dice by name..." oninput="filterDice()">
+        </div>
+
         <div class="library-container" id="libContainer"></div>
 
         <div class="footer-info">
@@ -90,25 +99,13 @@
     </div>
 
     <script>
-        // Función para la fecha y hora automática
         function setLastUpdate() {
             const dateElement = document.getElementById('update-date');
             const lastMod = new Date(document.lastModified);
-            
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            };
-            
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
             dateElement.innerText = "Last Updated: " + lastMod.toLocaleDateString('en-US', options);
         }
 
-        const STARTING_DECK = ["", "", "", "", ""];
-        
         const diceRoles = {
             shooters: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa"],
             damage: ["fire", "electric", "wind", "poison", "ice", "broken", "gamble", "thorn", "crack", "energy", "arrow", "slingshot", "sword", "smite", "death", "teleport", "laser", "infect", "modified_electric", "absorb", "mighty_wind", "gear", "wave", "flame", "clone", "rock", "speed_gun", "berserker", "snowball", "whim", "pinball", "solitude", "holy_sword", "solar", "atomic", "gun", "typhoon", "combo", "star", "yinyang", "guardian", "overheat", "earthquake", "recharge", "compression", "rage", "soul", "forging", "volcano", "medusa", "light"]
@@ -121,10 +118,9 @@
             "Common": ["Fire", "Electric", "Wind", "Poison", "Ice", "Iron", "Broken", "Gamble", "Lock"]
         };
 
-        let selectedSlot = 0;
-        let activeDieImg = "";
-        let activeType = "";
+        let selectedSlot = 0, activeDieImg = "", activeType = "";
 
+        // UI Hand Setup
         const handUI = document.getElementById('playerHand');
         for(let i = 0; i < 5; i++) {
             const div = document.createElement('div');
@@ -132,11 +128,13 @@
             div.onclick = () => pickSlot(i);
             div.innerHTML = `<img id="slot${i}" src="" data-type="" style="display:none">`;
             handUI.appendChild(div);
-        };
+        }
 
+        // Library Generation
         const libContainer = document.getElementById('libContainer');
         for (const [cat, list] of Object.entries(diceData)) {
             const section = document.createElement('div');
+            section.className = 'category-section';
             section.innerHTML = `<div class="category-title">${cat}</div>`;
             const grid = document.createElement('div'); grid.className = 'grid';
             list.forEach(name => {
@@ -146,17 +144,34 @@
                 item.innerHTML = `<img src="${fileName}" title="${name.replace(/_/g, ' ')}">`;
                 item.onclick = () => {
                     const deckImg = document.getElementById(`slot${selectedSlot}`);
-                    deckImg.src = fileName; 
-                    deckImg.dataset.type = name.toLowerCase();
+                    deckImg.src = fileName; deckImg.dataset.type = name.toLowerCase();
                     deckImg.style.display = "block";
-                    activeDieImg = fileName; 
-                    activeType = name.toLowerCase();
+                    activeDieImg = fileName; activeType = name.toLowerCase();
                 };
                 grid.appendChild(item);
             });
             section.appendChild(grid); libContainer.appendChild(section);
         }
 
+        // Search Function
+        function filterDice() {
+            const term = document.getElementById('diceSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.lib-item');
+            const sections = document.querySelectorAll('.category-section');
+
+            items.forEach(item => {
+                const name = item.querySelector('img').title.toLowerCase();
+                item.style.display = name.includes(term) ? "block" : "none";
+            });
+
+            // Hide titles if no dice match in that category
+            sections.forEach(section => {
+                const hasVisible = Array.from(section.querySelectorAll('.lib-item')).some(i => i.style.display !== "none");
+                section.style.display = hasVisible ? "block" : "none";
+            });
+        }
+
+        // Board Generation
         const board = document.getElementById('board');
         for (let i = 0; i < 15; i++) {
             const s = document.createElement('div'); s.className = 'slot';
@@ -172,8 +187,7 @@
         function pickSlot(i) {
             selectedSlot = i;
             const img = document.getElementById(`slot${i}`);
-            activeDieImg = img.src || ""; 
-            activeType = img.dataset.type || "";
+            activeDieImg = img.src || ""; activeType = img.dataset.type || "";
             document.querySelectorAll('.deck-slot').forEach((s, idx) => s.classList.toggle('selected', idx === i));
         }
 
@@ -188,7 +202,6 @@
                 const idx = Array.from(slots).indexOf(s);
                 const r = Math.floor(idx / 5), c = idx % 5;
                 const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
-                
                 let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, totalNeighbors: 0 };
 
                 neighbors.forEach(pos => {
