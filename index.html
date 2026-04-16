@@ -3,33 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Dice Board Simulator - Fixed</title>
+    <title>Random Dice Board Simulator</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
         .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; }
+        
         .last-update { font-size: 0.75em; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; background: #16213e; padding: 25px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; }
         .slot { aspect-ratio: 1 / 1; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; position: relative; transition: all 0.2s; min-height: 50px; }
         .slot img { width: 85%; height: 85%; object-fit: contain; z-index: 5; }
+        
         .current-deck { display: flex; gap: 8px; margin: 20px 0; padding: 10px; background: #1b1b2f; border-radius: 15px; border: 2px solid #e94560; justify-content: center; width: 100%; box-sizing: border-box; }
         .deck-slot { width: 18%; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid #444; cursor: pointer; overflow: hidden; background: #0f3460; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .deck-slot.selected { border-color: #00fff2; transform: scale(1.1); box-shadow: 0 0 10px #00fff2; }
         .deck-slot img { width: 100%; height: 100%; object-fit: contain; }
+        
         .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #00b3ff; background: #1b1b2f; color: white; font-size: 1em; box-sizing: border-box; }
         .library-container { width: 100%; max-height: 400px; overflow-y: auto; background: #16213e; padding: 15px; border-radius: 10px; box-sizing: border-box; }
+        
         .cat-legendary { color: #ffae00; border-bottom: 1px solid #ffae00; }
         .cat-unique { color: #ffb7ce; border-bottom: 1px solid #ffb7ce; }
         .cat-rare { color: #87ceeb; border-bottom: 1px solid #87ceeb; }
         .cat-common { color: #ffffff; border-bottom: 1px solid #ffffff; }
+
         .category-title { margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
         .lib-item { aspect-ratio: 1 / 1; cursor: pointer; background: #0a0a12; border-radius: 5px; border: 1px solid #333; transition: 0.2s; }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; }
+        
         .board-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 15px 0; width: 100%; }
         .btn-clear { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-share { background: #00b3ff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
         .footer-info { margin-top: 25px; padding: 20px; background: #1b1b2f; border-radius: 10px; border-top: 3px solid #00b3ff; width: 100%; box-sizing: border-box; font-size: 0.9em; line-height: 1.6; }
+        .footer-info a { color: #00b3ff; text-decoration: none; font-weight: bold; }
+
         h2 { margin: 10px 0; font-size: 1.5em; text-align: center; }
+        h3 { font-size: 0.9em; text-align: center; color: #aaa; margin: 5px 0; }
     </style>
 </head>
 <body>
@@ -48,26 +59,36 @@
         <h3>YOUR HAND</h3>
         <div class="current-deck" id="playerHand"></div>
         
-        <input type="text" class="search-box" id="diceSearch" placeholder="🔍 Search dice..." oninput="filterDice()">
+        <input type="text" class="search-box" id="diceSearch" placeholder="🔍 Search dice by name..." oninput="filterDice()">
         
         <div class="library-container" id="libContainer"></div>
 
         <div class="footer-info">
-            <h4 style="color: #ffae00;">🛠️ Troubleshooting</h4>
-            <p>If images fail, please clear cache or use Incognito Mode. Manual screenshots are great for sharing!</p>
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #ffae00; margin-top: 0;">🛠️ Troubleshooting / Solución de Problemas</h4>
+                <p><strong>EN:</strong> If images are missing or effects fail, please <strong>Clear Cache</strong> or open in <strong>Incognito Mode</strong>. Manual <strong>screenshots</strong> are also a great way to share!</p>
+                <p><strong>ES:</strong> Si faltan imágenes o fallan los efectos, por favor <strong>Limpia el Caché</strong> o abre en <strong>Modo Incógnito</strong>. ¡Las <strong>capturas de pantalla</strong> son una excelente forma de compartir!</p>
+            </div>
+            <div style="margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px;">
+                <h4 style="color: #00fff2; margin-top: 0;">💬 Contact & Feedback</h4>
+                <p>Bugs, suggestions or recommendations? Let me know!</p>
+                <p>
+                    <a href="https://github.com/Resck0/Random-Dice-Table-Builder/issues" target="_blank">📝 Report a Bug / Issue (GitHub)</a> | 
+                    <span style="color: #ce19ff; font-weight: bold;">Discord: rescooo</span>
+                </p>
+            </div>
+            <div style="border-top: 1px solid #333; padding-top: 15px;">
+                <h4 style="color: #e94560; margin-top: 0;">❤️ Special Thanks / Agradecimientos</h4>
+                <p>Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> and <strong>mathanmuoi</strong>! ¡Mil gracias por el apoyo!</p>
+            </div>
         </div>
     </div>
 
     <script>
-        // MAPA DE IDs UNICOS Y CORREGIDOS
         const idMap = {
-            // Legendaries
             "Nuclear": "nu", "Landmine": "lm", "Sand_Swamp": "ss", "Joker": "jk", "Holy_Sword": "hs", "Hell": "he", "Shield": "sh", "Blizzard": "bl", "Growth": "gr", "Summoner": "su", "Solar": "so", "Assassin": "as", "Atomic": "at", "Gun": "gu", "Typhoon": "ty", "Supplement": "sp", "Metastasis": "mt", "Time": "ti", "Combo": "co", "Lunar": "lu", "Flow": "fl", "Star": "st", "Ix10": "ix", "Silence": "sl", "Royal": "ro", "YinYang": "yy", "Scope": "sc", "Bubble": "bb", "Guardian": "gd", "Overheat": "oh", "Earthquake": "eq", "Timewinder": "tw", "Recharge": "rc", "Compression": "cp", "Lighting_Cloud": "lc", "Storm": "sm", "Ignition": "ig", "Gravity": "gv", "Rage": "rg", "Reverse": "rv", "Tsunami": "ts", "Phantom_Thief": "pt", "Predator": "pd", "Dimension": "di", "Soul": "soul", "Satellite_Strike": "sk", "Devil_Sword": "ds", "Variable": "va", "Giga_Switch": "gs", "Echo": "ec", "Monolith": "mo", "Forging": "fg", "Volcano": "vo", "Sealing": "sn", "Bastion": "ba", "Distortion": "dt", "Medusa": "me",
-            // Uniques
             "Death": "de", "Teleport": "tp", "Laser": "la", "Mimic": "mi", "Infect": "in", "Modified_Electric": "me_e", "Absorb": "ab", "Mighty_Wind": "mw", "Switch": "sw", "Gear": "ge", "Wave": "wa", "Flame": "fm", "Healing": "hl", "Clone": "cl", "Cracked_Growth": "cg", "Rock": "rk", "Bounty": "bo", "Speed_Gun": "sg", "Berserker": "bk", "Snowball": "sb", "Whim": "wm", "Pinball": "pb", "Solitude": "sd", "Exhaust": "ex", "Barrier": "br",
-            // Rares
             "Mine": "mn", "Light": "li", "Thorn": "th", "Crack": "cr", "Critical": "ci", "Energy": "en", "Sacrifice": "sa", "Arrow": "ar", "Random_Growth": "rg_r", "Slingshot": "slin", "Sword": "swo", "Smite": "smi",
-            // Commons
             "Fire": "fi", "Electric": "el", "Wind": "wi", "Poison": "po", "Ice": "ic", "Iron": "ir", "Broken": "bro", "Gamble": "ga", "Lock": "lo"
         };
 
@@ -82,7 +103,7 @@
 
         let selectedSlot = 0, activeDieImg = "", activeDieName = "";
 
-        // CREAR MANO
+        // Crear Mano
         for(let i = 0; i < 5; i++) {
             const div = document.createElement('div');
             div.className = `deck-slot ${i === 0 ? 'selected' : ''}`;
@@ -91,7 +112,7 @@
             document.getElementById('playerHand').appendChild(div);
         }
 
-        // LIBRERIA
+        // Librería
         function buildLibrary() {
             const lib = document.getElementById('libContainer');
             lib.innerHTML = '';
@@ -118,7 +139,7 @@
             }
         }
 
-        // TABLERO
+        // Tablero
         const board = document.getElementById('board');
         for (let i = 0; i < 15; i++) {
             const s = document.createElement('div'); 
@@ -147,6 +168,10 @@
             const query = document.getElementById('diceSearch').value.toLowerCase();
             document.querySelectorAll('.lib-item img').forEach(img => {
                 img.parentElement.style.display = img.title.toLowerCase().includes(query) ? "block" : "none";
+            });
+            document.querySelectorAll('.category-section').forEach(sec => {
+                const hasVisible = Array.from(sec.querySelectorAll('.lib-item')).some(i => i.style.display !== "none");
+                sec.style.display = hasVisible ? "block" : "none";
             });
         }
 
@@ -191,8 +216,11 @@
         function resetBoard() { document.querySelectorAll('.slot').forEach(s => s.innerHTML = ''); }
 
         window.onload = () => {
-            buildLibrary(); loadFromUrl();
-            document.getElementById('update-date').innerText = "Last Updated: " + new Date().toLocaleString();
+            buildLibrary(); 
+            loadFromUrl(); 
+            const lastMod = new Date(document.lastModified);
+            const options = { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+            document.getElementById('update-date').innerText = "Last Updated: " + lastMod.toLocaleString('en-US', options);
         };
     </script>
 </body>
