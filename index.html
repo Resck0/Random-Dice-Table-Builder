@@ -108,12 +108,16 @@
         let selectedSlot = 0, activeDieImg = "", activeDieName = "";
 
         // Crear Mano
-        for(let i = 0; i < 5; i++) {
-            const div = document.createElement('div');
-            div.className = `deck-slot ${i === 0 ? 'selected' : ''}`;
-            div.onclick = () => pickSlot(i);
-            div.innerHTML = `<img id="slot${i}" src="" data-name="" style="display:none">`;
-            document.getElementById('playerHand').appendChild(div);
+        function createHand() {
+            const container = document.getElementById('playerHand');
+            container.innerHTML = '';
+            for(let i = 0; i < 5; i++) {
+                const div = document.createElement('div');
+                div.className = `deck-slot ${i === 0 ? 'selected' : ''}`;
+                div.onclick = () => pickSlot(i);
+                div.innerHTML = `<img id="slot${i}" src="" data-name="" style="display:none">`;
+                container.appendChild(div);
+            }
         }
 
         // Librería
@@ -240,7 +244,7 @@
 
         function loadFromUrl() {
             const bData = new URLSearchParams(window.location.search).get('b');
-            if (!bData) return;
+            if (!bData) return false;
             const [hPart, bPart] = bData.split('|');
             const hIds = hPart.split('.'), bIds = bPart.split('.');
             hIds.forEach((id, i) => {
@@ -259,13 +263,30 @@
                 }
             });
             updateBuffs();
+            return true;
+        }
+
+        function setDefaultHand() {
+            const metaHand = ["Distortion", "Lunar", "Holy_Sword", "Scope", "Snowball"];
+            metaHand.forEach((name, i) => {
+                const img = document.getElementById(`slot${i}`);
+                img.src = `70px-${name}_Dice.png`;
+                img.dataset.name = name;
+                img.style.display = "block";
+            });
+            // Activar por defecto el primer dado
+            pickSlot(0);
         }
 
         function resetBoard() { document.querySelectorAll('.slot').forEach(s => { s.innerHTML = ''; s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed"; }); }
 
         window.onload = () => {
+            createHand();
             buildLibrary(); 
-            loadFromUrl(); 
+            // Si no carga nada de la URL, ponemos la mano default
+            if (!loadFromUrl()) {
+                setDefaultHand();
+            }
             const lastMod = new Date(document.lastModified);
             const options = { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
             document.getElementById('update-date').innerText = "Last Updated: " + lastMod.toLocaleString('en-US', options);
