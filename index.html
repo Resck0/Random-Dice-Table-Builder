@@ -104,6 +104,10 @@
                     <span style="color: #ce19ff; font-weight: bold;">Discord: rescooo</span>
                 </p>
             </div>
+            <div style="border-top: 1px solid #333; padding-top: 15px;">
+                <h4 style="color: #e94560; margin-top: 0;">❤️ Special Thanks / Agradecimientos</h4>
+                <p>Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> and <strong>mathanmuoi</strong>! ¡Mil gracias por el apoyo!</p>
+            </div>
         </div>
     </div>
 
@@ -174,31 +178,17 @@
         function renderBoard() {
             const boardDiv = document.getElementById('board');
             boardDiv.innerHTML = '';
-            
-            let displayIndices = [];
-            if (currentPOV === 'DPS') {
-                displayIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-            } else {
-                displayIndices = [10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4];
-            }
+            let displayIndices = currentPOV === 'DPS' ? [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14] : [10,11,12,13,14,5,6,7,8,9,0,1,2,3,4];
 
             displayIndices.forEach(realIdx => {
                 const s = document.createElement('div');
                 s.className = 'slot';
                 s.dataset.realIdx = realIdx;
-                
                 const die = boardState[realIdx];
-                if (die) {
-                    s.innerHTML = `<img src="70px-${die}_Dice.png" data-name="${die}">`;
-                }
-
+                if (die) s.innerHTML = `<img src="70px-${die}_Dice.png" data-name="${die}">`;
                 s.onclick = () => {
                     if (!activeDieName) return;
-                    if (boardState[realIdx] === activeDieName) {
-                        boardState[realIdx] = null;
-                    } else {
-                        boardState[realIdx] = activeDieName;
-                    }
+                    boardState[realIdx] = (boardState[realIdx] === activeDieName) ? null : activeDieName;
                     renderBoard();
                 };
                 boardDiv.appendChild(s);
@@ -209,10 +199,8 @@
         function togglePOV() {
             const label = document.getElementById('povLabel');
             currentPOV = currentPOV === 'DPS' ? 'SUPP' : 'DPS';
-            
             label.innerText = `${currentPOV} POV`;
             label.className = `pov-indicator ${currentPOV === 'DPS' ? 'pov-dps' : 'pov-supp'}`;
-            
             document.getElementById('flipCard').classList.toggle('rotated');
             renderBoard();
         }
@@ -242,13 +230,11 @@
                 s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed";
                 const img = s.querySelector('img');
                 if (!img) return;
-                
                 const type = img.dataset.name.toLowerCase();
                 const realIdx = parseInt(s.dataset.realIdx);
                 const r = Math.floor(realIdx / 5), c = realIdx % 5;
                 const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
                 let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, total: 0 };
-                
                 neighbors.forEach(p => {
                     const nr = r + p.dr, nc = c + p.dc;
                     if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
@@ -261,7 +247,6 @@
                         }
                     }
                 });
-
                 const isS = diceRoles.shooters.includes(type), isD = diceRoles.damage.includes(type);
                 let buffs = [];
                 if ((type.includes('bastion') && b.total > 0) || b.bastion > 0) buffs.push({id: 3, color: '#c4a484'});
@@ -270,7 +255,6 @@
                 if (!type.includes('lunar') && !type.includes('scope') && isD && b.hell > 0) buffs.push({id: 4, color: '#999999'});
                 if (!type.includes('lunar') && !type.includes('scope') && !type.includes('critical') && isD && b.crit > 0) buffs.push({id: 5, color: '#ffae00'});
                 if (!type.includes('lunar') && !type.includes('scope') && isD && b.light > 0) buffs.push({id: 6, color: '#ffff00'});
-                
                 if (buffs.length > 0) {
                     s.style.borderStyle = "solid"; buffs.sort((a,b)=>a.id-b.id);
                     s.style.borderColor = buffs[0].color;
@@ -281,10 +265,7 @@
 
         function copyShareLink() {
             const hand = [];
-            for(let i=0; i<5; i++) {
-                const name = document.getElementById(`slot${i}`).dataset.name;
-                hand.push(idMap[name] || "x");
-            }
+            for(let i=0; i<5; i++) hand.push(idMap[document.getElementById(`slot${i}`).dataset.name] || "x");
             const boardData = boardState.map(name => idMap[name] || "x");
             const url = new URL(window.location.href);
             url.searchParams.set('b', hand.join('.') + '|' + boardData.join('.'));
@@ -295,45 +276,31 @@
             const bData = new URLSearchParams(window.location.search).get('b');
             if (!bData) return false;
             const [hPart, bPart] = bData.split('|');
-            const hIds = hPart.split('.'), bIds = bPart.split('.');
-            hIds.forEach((id, i) => {
+            hPart.split('.').forEach((id, i) => {
                 const name = revMap[id];
                 if (name) {
                     const img = document.getElementById(`slot${i}`);
-                    img.src = `70px-${name}_Dice.png`;
-                    img.dataset.name = name; img.style.display = "block";
+                    img.src = `70px-${name}_Dice.png`; img.dataset.name = name; img.style.display = "block";
                 }
             });
-            bIds.forEach((id, i) => {
-                boardState[i] = revMap[id] || null;
-            });
+            bPart.split('.').forEach((id, i) => { boardState[i] = revMap[id] || null; });
             renderBoard();
             return true;
         }
 
         function setDefaultHand() {
-            const metaHand = ["Distortion", "Lunar", "Holy_Sword", "Scope", "Snowball"];
-            metaHand.forEach((name, i) => {
+            ["Distortion", "Lunar", "Holy_Sword", "Scope", "Snowball"].forEach((name, i) => {
                 const img = document.getElementById(`slot${i}`);
-                img.src = `70px-${name}_Dice.png`;
-                img.dataset.name = name;
-                img.style.display = "block";
+                img.src = `70px-${name}_Dice.png`; img.dataset.name = name; img.style.display = "block";
             });
             pickSlot(0);
         }
 
-        function resetBoard() { 
-            boardState = Array(15).fill(null);
-            renderBoard(); 
-        }
+        function resetBoard() { boardState = Array(15).fill(null); renderBoard(); }
 
         window.onload = () => {
-            createHand();
-            buildLibrary(); 
-            if (!loadFromUrl()) {
-                setDefaultHand();
-                renderBoard();
-            }
+            createHand(); buildLibrary(); 
+            if (!loadFromUrl()) { setDefaultHand(); renderBoard(); }
             const lastMod = new Date(document.lastModified);
             const options = { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
             document.getElementById('update-date').innerText = "Last Updated: " + lastMod.toLocaleString('en-US', options);
