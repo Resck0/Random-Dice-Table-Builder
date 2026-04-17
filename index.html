@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Dice Board Simulator - Full Version</title>
+    <title>Random Dice Board Simulator - POV Flip</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: white; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
         .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; }
         .last-update { font-size: 0.75em; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
 
-        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; background: #16213e; padding: 25px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        /* Estilo para el modo Flip */
-        .board.flipped { transform: rotate(180deg); }
-        .board.flipped .slot img { transform: rotate(180deg); } /* Mantener los dados derechos aunque el tablero rote */
+        /* POV Indicator Styles */
+        .pov-indicator { font-weight: bold; margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase; transition: color 0.3s; }
+        .pov-dps { color: #ff4d4d; text-shadow: 0 0 8px #ff4d4d; }
+        .pov-supp { color: #d199ff; text-shadow: 0 0 8px #d199ff; }
 
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; background: #16213e; padding: 25px; border-radius: 10px; border: 2px solid #0f3460; width: 100%; box-sizing: border-box; }
         .slot { aspect-ratio: 1 / 1; background: #0f3460; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px dashed #444; position: relative; transition: all 0.2s; min-height: 50px; }
-        .slot img { width: 85%; height: 85%; object-fit: contain; z-index: 5; transition: transform 0.6s; }
+        .slot img { width: 85%; height: 85%; object-fit: contain; z-index: 5; }
         
         .current-deck { display: flex; gap: 8px; margin: 20px 0; padding: 10px; background: #1b1b2f; border-radius: 15px; border: 2px solid #e94560; justify-content: center; width: 100%; box-sizing: border-box; }
         .deck-slot { width: 18%; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid #444; cursor: pointer; overflow: hidden; background: #0f3460; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
@@ -35,14 +36,19 @@
         .lib-item { aspect-ratio: 1 / 1; cursor: pointer; background: #0a0a12; border-radius: 5px; border: 1px solid #333; transition: 0.2s; }
         .lib-item img { width: 100%; height: 100%; object-fit: contain; }
         
-        .board-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0; width: 100%; }
+        .board-controls { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; margin: 15px 0; width: 100%; }
         .btn-clear { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-share { background: #00b3ff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        
-        /* Botón de Flip con animación de carta */
-        .btn-flip { background: #6c5ce7; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; perspective: 1000px; }
-        .flip-icon { display: inline-block; transition: transform 0.6s; transform-style: preserve-3d; }
-        .btn-flip.active .flip-icon { transform: rotateY(180deg); }
+
+        /* POV Flip Button Section */
+        .flip-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .flip-container { perspective: 1000px; cursor: pointer; width: 50px; height: 70px; }
+        .flip-card { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flip-card.rotated { transform: rotateY(180deg); }
+        .flip-front, .flip-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px solid #fff; font-size: 1.8em; }
+        .flip-front { background: linear-gradient(45deg, #1a1a2e, #16213e); color: #ff4d4d; border-color: #ff4d4d; }
+        .flip-back { background: linear-gradient(45deg, #3e163e, #1a1a2e); color: #d199ff; border-color: #d199ff; transform: rotateY(180deg); }
+        .flip-text { font-size: 0.65em; font-weight: bold; color: #888; letter-spacing: 1px; }
 
         .footer-info { margin-top: 25px; padding: 20px; background: #1b1b2f; border-radius: 10px; border-top: 3px solid #00b3ff; width: 100%; box-sizing: border-box; font-size: 0.9em; line-height: 1.6; }
         .footer-info a { color: #00b3ff; text-decoration: none; font-weight: bold; }
@@ -57,14 +63,24 @@
         <h2>DICE BOARD SIMULATOR</h2>
         <div class="last-update" id="update-date">...</div>
 
+        <div class="pov-indicator pov-dps" id="povLabel">DPS POV</div>
         <div class="board" id="board"></div>
         
         <div class="board-controls">
-            <button class="btn-flip" id="flipBtn" onclick="togglePOV()">
-                <span class="flip-icon">🃏</span> Flip POV
-            </button>
-            <button class="btn-share" onclick="copyShareLink()">📋 Copy Share Link</button>
-            <button class="btn-clear" onclick="resetBoard()">Clear Board</button>
+            <div class="flip-wrapper">
+                <div class="flip-container" onclick="togglePOV()" title="Change POV">
+                    <div class="flip-card" id="flipCard">
+                        <div class="flip-front">⚔️</div>
+                        <div class="flip-back">🛡️</div>
+                    </div>
+                </div>
+                <div class="flip-text">FLIP BOARD</div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-share" onclick="copyShareLink()">📋 Copy Share Link</button>
+                <button class="btn-clear" onclick="resetBoard()">Clear Board</button>
+            </div>
         </div>
 
         <h3>YOUR HAND</h3>
@@ -87,10 +103,6 @@
                     <a href="https://github.com/Resck0/Random-Dice-Table-Builder/issues" target="_blank">📝 Report a Bug / Issue (GitHub)</a> | 
                     <span style="color: #ce19ff; font-weight: bold;">Discord: rescooo</span>
                 </p>
-            </div>
-            <div style="border-top: 1px solid #333; padding-top: 15px;">
-                <h4 style="color: #e94560; margin-top: 0;">❤️ Special Thanks / Agradecimientos</h4>
-                <p>Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> and <strong>mathanmuoi</strong>! ¡Mil gracias por el apoyo!</p>
             </div>
         </div>
     </div>
@@ -118,6 +130,8 @@
         };
 
         let selectedSlot = 0, activeDieImg = "", activeDieName = "";
+        let currentPOV = 'DPS'; 
+        let boardState = Array(15).fill(null); 
 
         function createHand() {
             const container = document.getElementById('playerHand');
@@ -157,29 +171,50 @@
             }
         }
 
-        // Tablero
-        const boardElement = document.getElementById('board');
-        for (let i = 0; i < 15; i++) {
-            const s = document.createElement('div'); 
-            s.className = 'slot';
-            s.onclick = () => {
-                if (!activeDieName) return;
-                const existingImg = s.querySelector('img');
-                if (existingImg && existingImg.dataset.name === activeDieName) {
-                    s.innerHTML = '';
-                } else {
-                    s.innerHTML = `<img src="${activeDieImg}" data-name="${activeDieName}">`;
+        function renderBoard() {
+            const boardDiv = document.getElementById('board');
+            boardDiv.innerHTML = '';
+            
+            let displayIndices = [];
+            if (currentPOV === 'DPS') {
+                displayIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+            } else {
+                displayIndices = [10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4];
+            }
+
+            displayIndices.forEach(realIdx => {
+                const s = document.createElement('div');
+                s.className = 'slot';
+                s.dataset.realIdx = realIdx;
+                
+                const die = boardState[realIdx];
+                if (die) {
+                    s.innerHTML = `<img src="70px-${die}_Dice.png" data-name="${die}">`;
                 }
-                updateBuffs();
-            };
-            boardElement.appendChild(s);
+
+                s.onclick = () => {
+                    if (!activeDieName) return;
+                    if (boardState[realIdx] === activeDieName) {
+                        boardState[realIdx] = null;
+                    } else {
+                        boardState[realIdx] = activeDieName;
+                    }
+                    renderBoard();
+                };
+                boardDiv.appendChild(s);
+            });
+            updateBuffs();
         }
 
         function togglePOV() {
-            const board = document.getElementById('board');
-            const btn = document.getElementById('flipBtn');
-            board.classList.toggle('flipped');
-            btn.classList.toggle('active');
+            const label = document.getElementById('povLabel');
+            currentPOV = currentPOV === 'DPS' ? 'SUPP' : 'DPS';
+            
+            label.innerText = `${currentPOV} POV`;
+            label.className = `pov-indicator ${currentPOV === 'DPS' ? 'pov-dps' : 'pov-supp'}`;
+            
+            document.getElementById('flipCard').classList.toggle('rotated');
+            renderBoard();
         }
 
         function pickSlot(i) {
@@ -207,18 +242,19 @@
                 s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed";
                 const img = s.querySelector('img');
                 if (!img) return;
+                
                 const type = img.dataset.name.toLowerCase();
-                const idx = Array.from(slots).indexOf(s);
-                const r = Math.floor(idx / 5), c = idx % 5;
+                const realIdx = parseInt(s.dataset.realIdx);
+                const r = Math.floor(realIdx / 5), c = realIdx % 5;
                 const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
                 let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, total: 0 };
                 
                 neighbors.forEach(p => {
                     const nr = r + p.dr, nc = c + p.dc;
                     if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
-                        const nI = slots[nr * 5 + nc].querySelector('img');
-                        if (nI) {
-                            const nt = nI.dataset.name.toLowerCase(); b.total++;
+                        const neighborDie = boardState[nr * 5 + nc];
+                        if (neighborDie) {
+                            const nt = neighborDie.toLowerCase(); b.total++;
                             if (nt.includes('lunar')) b.lunar++; if (nt.includes('scope')) b.scope++;
                             if (nt.includes('hell')) b.hell++; if (nt.includes('critical')) b.crit++;
                             if (nt.includes('light')) b.light++; if (nt.includes('bastion')) b.bastion++;
@@ -249,11 +285,7 @@
                 const name = document.getElementById(`slot${i}`).dataset.name;
                 hand.push(idMap[name] || "x");
             }
-            const boardData = [];
-            document.querySelectorAll('.slot').forEach(s => {
-                const name = s.querySelector('img')?.dataset.name;
-                boardData.push(idMap[name] || "x");
-            });
+            const boardData = boardState.map(name => idMap[name] || "x");
             const url = new URL(window.location.href);
             url.searchParams.set('b', hand.join('.') + '|' + boardData.join('.'));
             navigator.clipboard.writeText(url.href).then(() => alert("Link Copied!"));
@@ -272,14 +304,10 @@
                     img.dataset.name = name; img.style.display = "block";
                 }
             });
-            const slots = document.querySelectorAll('.slot');
             bIds.forEach((id, i) => {
-                const name = revMap[id];
-                if (name && slots[i]) {
-                    slots[i].innerHTML = `<img src="70px-${name}_Dice.png" data-name="${name}">`;
-                }
+                boardState[i] = revMap[id] || null;
             });
-            updateBuffs();
+            renderBoard();
             return true;
         }
 
@@ -294,13 +322,17 @@
             pickSlot(0);
         }
 
-        function resetBoard() { document.querySelectorAll('.slot').forEach(s => { s.innerHTML = ''; s.style.boxShadow = "none"; s.style.borderColor = "#444"; s.style.borderStyle = "dashed"; }); }
+        function resetBoard() { 
+            boardState = Array(15).fill(null);
+            renderBoard(); 
+        }
 
         window.onload = () => {
             createHand();
             buildLibrary(); 
             if (!loadFromUrl()) {
                 setDefaultHand();
+                renderBoard();
             }
             const lastMod = new Date(document.lastModified);
             const options = { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
