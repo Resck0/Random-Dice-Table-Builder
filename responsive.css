@@ -1,0 +1,279 @@
+/* ── VARIABLES GLOBALES DE ESCALA ─────────────────────── */
+:root {
+    --board-gap: 14px;
+    --board-pad: 25px;
+    --slot-min:  50px;
+    --deck-gap:  8px;
+    --font-h2:   1.5em;
+    --font-h3:   0.9em;
+}
+ 
+ 
+/* ══════════════════════════════════════════════════════════
+   TABLET  ≤ 768px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+ 
+    body {
+        padding: 12px;
+        padding-top: 70px;
+    }
+ 
+    .container {
+        max-width: 100%;
+    }
+ 
+    .board {
+        gap: 10px;
+        padding: 18px;
+    }
+ 
+    .board-controls {
+        gap: 12px;
+    }
+ 
+    .btn-share,
+    .btn-clear {
+        padding: 10px 18px;
+        font-size: 0.92em;
+    }
+ 
+    .library-container {
+        max-height: 340px;
+    }
+}
+ 
+ 
+/* ══════════════════════════════════════════════════════════
+   MÓVIL  ≤ 480px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+ 
+    /* ── Body & container ── */
+    body {
+        padding: 8px;
+        padding-top: 65px;
+    }
+ 
+    :root {
+        --font-h2: 1.15em;
+        --font-h3: 0.78em;
+    }
+ 
+    h2 { font-size: var(--font-h2); margin: 6px 0; }
+    h3 { font-size: var(--font-h3); }
+ 
+    .last-update {
+        font-size: 0.65em;
+        letter-spacing: 0.5px;
+    }
+ 
+    /* ── Language bar ── */
+    .language-bar {
+        gap: 4px;
+        padding: 6px 8px;
+    }
+ 
+    .flag-btn img {
+        width: 32px;
+        height: 21px;
+    }
+ 
+    .flag-btn {
+        padding: 2px;
+    }
+ 
+    /* ── POV label ── */
+    .pov-indicator {
+        font-size: 0.85em;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+ 
+    /* ── Tablero ── */
+    .board {
+        gap: 7px;
+        padding: 12px;
+        border-radius: 8px;
+    }
+ 
+    .slot {
+        border-radius: 6px;
+        min-height: 0;     /* deja que el aspect-ratio controle el tamaño */
+    }
+ 
+    /* ── Controles del tablero ── */
+    .board-controls {
+        flex-direction: column;
+        gap: 10px;
+        margin: 10px 0;
+    }
+ 
+    .flip-wrapper {
+        flex-direction: row;
+        gap: 10px;
+    }
+ 
+    .flip-container {
+        width: 42px;
+        height: 58px;
+    }
+ 
+    .flip-front,
+    .flip-back {
+        font-size: 1.4em;
+    }
+ 
+    .flip-text {
+        font-size: 0.6em;
+        align-self: center;
+    }
+ 
+    /* Botones en fila en móvil */
+    .board-controls > div:last-child {
+        flex-direction: row !important;
+        gap: 8px;
+        width: 100%;
+    }
+ 
+    .btn-share,
+    .btn-clear {
+        flex: 1;
+        padding: 10px 6px;
+        font-size: 0.8em;
+        text-align: center;
+    }
+ 
+    /* ── Mano del jugador ── */
+    .current-deck {
+        gap: 5px;
+        padding: 8px;
+        margin: 12px 0;
+    }
+ 
+    .deck-slot {
+        width: 17%;
+        max-width: 56px;
+    }
+ 
+    /* ── Buscador ── */
+    .search-box {
+        padding: 9px 10px;
+        font-size: 0.88em;
+        margin-bottom: 10px;
+    }
+ 
+    /* ── Librería ── */
+    .library-container {
+        max-height: 280px;
+        padding: 10px;
+    }
+ 
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+        gap: 6px;
+    }
+ 
+    .category-title {
+        font-size: 0.75em;
+        margin: 10px 0 6px;
+    }
+ 
+    /* ── Footer ── */
+    .footer-info {
+        padding: 14px;
+        font-size: 0.8em;
+        margin-top: 16px;
+    }
+}
+ 
+ 
+/* ══════════════════════════════════════════════════════════
+   MÓVIL MUY PEQUEÑO  ≤ 360px
+   (el caso del chico de la foto)
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+ 
+    body {
+        padding: 5px;
+        padding-top: 60px;
+    }
+ 
+    /* Banderas más compactas */
+    .language-bar {
+        gap: 2px;
+        padding: 5px 4px;
+    }
+ 
+    .flag-btn img {
+        width: 26px;
+        height: 17px;
+    }
+ 
+    h2 { font-size: 1em; }
+ 
+    /* Tablero muy compacto */
+    .board {
+        gap: 5px;
+        padding: 8px;
+    }
+ 
+    /* Botones uno debajo del otro si no caben */
+    .board-controls > div:last-child {
+        flex-direction: column !important;
+    }
+ 
+    .btn-share,
+    .btn-clear {
+        width: 100%;
+        font-size: 0.78em;
+        padding: 9px 4px;
+    }
+ 
+    .deck-slot {
+        max-width: 48px;
+    }
+ 
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+        gap: 5px;
+    }
+ 
+    .library-container {
+        max-height: 240px;
+    }
+ 
+    .search-box {
+        font-size: 0.82em;
+        padding: 8px;
+    }
+}
+ 
+ 
+/* ══════════════════════════════════════════════════════════
+   ESCRITORIO GRANDE  ≥ 900px  (mejoras opcionales)
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 900px) {
+ 
+    .container {
+        max-width: 640px;
+    }
+ 
+    .board {
+        gap: 16px;
+        padding: 28px;
+    }
+ 
+    .library-container {
+        max-height: 460px;
+    }
+ 
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+    }
+ 
+    .flag-btn img {
+        width: 44px;
+        height: 29px;
+    }
+}

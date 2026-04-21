@@ -5,16 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Dice Board Simulator - POV Flip</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
 
+    <!-- Barra de banderas -->
+    <div class="language-bar">
+        <button class="flag-btn active" data-lang="en" onclick="setLanguage('en')" title="English">
+            <img src="https://flagcdn.com/w40/gb.png" alt="English">
+        </button>
+        <button class="flag-btn" data-lang="es" onclick="setLanguage('es')" title="Español">
+            <img src="https://flagcdn.com/w40/es.png" alt="Español">
+        </button>
+        <button class="flag-btn" data-lang="ru" onclick="setLanguage('ru')" title="Русский">
+            <img src="https://flagcdn.com/w40/ru.png" alt="Русский">
+        </button>
+        <button class="flag-btn" data-lang="zh" onclick="setLanguage('zh')" title="中文">
+            <img src="https://flagcdn.com/w40/cn.png" alt="中文">
+        </button>
+        <button class="flag-btn" data-lang="de" onclick="setLanguage('de')" title="Deutsch">
+            <img src="https://flagcdn.com/w40/de.png" alt="Deutsch">
+        </button>
+    </div>
+
     <div class="container">
-        <h2>DICE BOARD SIMULATOR</h2>
+        <h2 id="page-title">DICE BOARD SIMULATOR</h2>
         <div class="last-update" id="update-date">...</div>
 
         <div class="pov-indicator pov-dps" id="povLabel">DPS POV</div>
         <div class="board" id="board"></div>
-        
+
         <div class="board-controls">
             <div class="flip-wrapper">
                 <div class="flip-container" onclick="togglePOV()" title="Change POV">
@@ -23,43 +43,44 @@
                         <div class="flip-back">🛡️</div>
                     </div>
                 </div>
-                <div class="flip-text">FLIP BOARD</div>
+                <div class="flip-text" id="flip-text">FLIP BOARD</div>
             </div>
-            
+
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn-share" onclick="copyShareLink()">📋 Copy Share Link</button>
-                <button class="btn-clear" onclick="resetBoard()">Clear Board</button>
+                <button class="btn-share" id="btn-share" onclick="copyShareLink()">📋 Copy Share Link</button>
+                <button class="btn-clear" id="btn-clear" onclick="resetBoard()">Clear Board</button>
             </div>
         </div>
 
-        <h3>YOUR HAND</h3>
+        <h3 id="hand-label">YOUR HAND</h3>
         <div class="current-deck" id="playerHand"></div>
-        
+
         <input type="text" class="search-box" id="diceSearch" placeholder="🔍 Search dice by name..." oninput="filterDice()">
-        
+
         <div class="library-container" id="libContainer"></div>
 
         <div class="footer-info">
             <div style="margin-bottom: 20px;">
-                <h4 style="color: #ffae00; margin-top: 0;">🛠️ Troubleshooting / Solución de Problemas</h4>
-                <p><strong>EN:</strong> If images are missing or effects fail, please <strong>Clear Cache</strong> or open in <strong>Incognito Mode</strong>. Manual <strong>screenshots</strong> are also a great way to share!</p>
-                <p><strong>ES:</strong> Si faltan imágenes o fallan los efectos, por favor <strong>Limpia el Caché</strong> o abre en <strong>Modo Incógnito</strong>. ¡Las <strong>capturas de pantalla</strong> son una excelente forma de compartir!</p>
+                <h4 id="footer-troubleshoot-title" style="color: #ffae00; margin-top: 0;">🛠️ Troubleshooting</h4>
+                <p id="footer-troubleshoot-text">If images are missing or effects fail, please <strong>Clear Cache</strong> or open in <strong>Incognito Mode</strong>.</p>
             </div>
             <div style="margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px;">
-                <h4 style="color: #00fff2; margin-top: 0;">💬 Contact & Feedback</h4>
-                <p>Bugs, suggestions or recommendations? Let me know!</p>
-                <p>
-                    <a href="https://github.com/Resck0/Random-Dice-Table-Builder/issues" target="_blank">📝 Report a Bug / Issue (GitHub)</a> | 
+                <h4 id="footer-contact-title" style="color: #00fff2; margin-top: 0;">💬 Contact & Feedback</h4>
+                <p id="footer-contact-text">Bugs, suggestions or recommendations? Let me know!</p>
+                <p id="footer-contact-links">
+                    <a href="https://github.com/Resck0/Random-Dice-Table-Builder/issues" target="_blank">📝 Report a Bug / Issue (GitHub)</a> |
                     <span style="color: #ce19ff; font-weight: bold;">Discord: rescooo</span>
                 </p>
             </div>
             <div style="border-top: 1px solid #333; padding-top: 15px;">
-                <h4 style="color: #e94560; margin-top: 0;">❤️ Special Thanks / Agradecimientos</h4>
-                <p>Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> and <strong>mathanmuoi</strong>! ¡Mil gracias por el apoyo!</p>
+                <h4 id="footer-thanks-title" style="color: #e94560; margin-top: 0;">❤️ Special Thanks</h4>
+                <p id="footer-thanks-text">Huge thanks to <strong>Good/Evil/Harmny Crews</strong>, <strong>Avalon Crew</strong> and <strong>mathanmuoi</strong>!</p>
             </div>
         </div>
     </div>
 
+    <!-- ORDEN IMPORTANTE: translations → logic → controls -->
+    <script src="translations.js"></script>
     <script src="logic.js"></script>
     <script src="controls.js"></script>
 </body>

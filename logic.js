@@ -23,40 +23,50 @@ const diceRoles = {
 };
 
 let selectedSlot = 0, activeDieImg = "", activeDieName = "";
-let currentPOV = 'DPS'; 
-let boardState = Array(15).fill(null); 
+let currentPOV = 'DPS';
+let boardState = Array(15).fill(null);
 
+// ── CATEGORÍA POR NOMBRE ──────────────────────────────────
+const diceCategory = {};
+for (const [cat, list] of Object.entries(diceData)) {
+    list.forEach(name => diceCategory[name] = cat.toLowerCase());
+}
+
+function getDieCategory(name) {
+    return diceCategory[name] || 'legendary';
+}
+
+// ── BUFFS ─────────────────────────────────────────────────
 function updateBuffs() {
     const slots = document.querySelectorAll('.slot');
     slots.forEach(s => {
-        // Reset estilos base
-        s.style.boxShadow = "none"; 
-        s.style.borderColor = "#444"; 
+        s.style.boxShadow   = "none";
+        s.style.borderColor = "#444";
         s.style.borderStyle = "dashed";
         s.style.borderWidth = "1px";
 
         const img = s.querySelector('img');
         if (!img) return;
 
-        const type = img.dataset.name.toLowerCase();
+        const type    = img.dataset.name.toLowerCase();
         const realIdx = parseInt(s.dataset.realIdx);
         const r = Math.floor(realIdx / 5), c = realIdx % 5;
-        const neighbors = [{dr:-1, dc:0}, {dr:1, dc:0}, {dr:0, dc:-1}, {dr:0, dc:1}];
-        
-        let b = { lunar: 0, scope: 0, hell: 0, crit: 0, light: 0, bastion: 0, total: 0 };
-        
+        const neighbors = [{dr:-1,dc:0},{dr:1,dc:0},{dr:0,dc:-1},{dr:0,dc:1}];
+
+        let b = { lunar:0, scope:0, hell:0, crit:0, light:0, bastion:0, total:0 };
+
         neighbors.forEach(p => {
             const nr = r + p.dr, nc = c + p.dc;
             if (nr >= 0 && nr < 3 && nc >= 0 && nc < 5) {
                 const neighborDie = boardState[nr * 5 + nc];
                 if (neighborDie) {
                     const nt = neighborDie.toLowerCase(); b.total++;
-                    if (nt.includes('lunar')) b.lunar++; 
-                    if (nt.includes('scope')) b.scope++;
-                    if (nt.includes('hell')) b.hell++; 
+                    if (nt.includes('lunar'))    b.lunar++;
+                    if (nt.includes('scope'))    b.scope++;
+                    if (nt.includes('hell'))     b.hell++;
                     if (nt.includes('critical')) b.crit++;
-                    if (nt.includes('light')) b.light++; 
-                    if (nt.includes('bastion')) b.bastion++;
+                    if (nt.includes('light'))    b.light++;
+                    if (nt.includes('bastion'))  b.bastion++;
                 }
             }
         });
@@ -64,42 +74,27 @@ function updateBuffs() {
         const isS = diceRoles.shooters.includes(type), isD = diceRoles.damage.includes(type);
         let buffs = [];
 
-        // Definición de prioridades y colores originales
-        if ((type.includes('bastion') && b.total > 0) || b.bastion > 0) buffs.push({id: 3, color: '#c4a484'}); // Bastion
-        if (!type.includes('lunar') && isS && b.lunar > 0) buffs.push({id: 1, color: '#00fff2'}); // Lunar
-        if (!type.includes('scope') && isS && b.scope > 0) buffs.push({id: 2, color: '#ff0000'}); // Scope
-        if (!type.includes('lunar') && !type.includes('scope') && isD && b.hell > 0) buffs.push({id: 4, color: '#999999'}); // Hell
-        if (!type.includes('lunar') && !type.includes('scope') && !type.includes('critical') && isD && b.crit > 0) buffs.push({id: 5, color: '#ffae00'}); // Crit
-        if (!type.includes('lunar') && !type.includes('scope') && isD && b.light > 0) buffs.push({id: 6, color: '#ffff00'}); // Light
-        
-        if (buffs.length > 0) {
-            // Ordenar por ID de prioridad (Lunar > Scope > Bastion > etc.)
-            buffs.sort((a,b) => a.id - b.id);
+        if ((type.includes('bastion') && b.total > 0) || b.bastion > 0) buffs.push({id:3, color:'#c4a484'});
+        if (!type.includes('lunar') && isS && b.lunar > 0)              buffs.push({id:1, color:'#00fff2'});
+        if (!type.includes('scope') && isS && b.scope > 0)              buffs.push({id:2, color:'#ff0000'});
+        if (!type.includes('lunar') && !type.includes('scope') && isD && b.hell > 0)  buffs.push({id:4, color:'#999999'});
+        if (!type.includes('lunar') && !type.includes('scope') && !type.includes('critical') && isD && b.crit > 0) buffs.push({id:5, color:'#ffae00'});
+        if (!type.includes('lunar') && !type.includes('scope') && isD && b.light > 0) buffs.push({id:6, color:'#ffff00'});
 
-            // 1. El borde exterior (border-color) siempre es el bufo de mayor prioridad (índice 0)
+        if (buffs.length > 0) {
+            buffs.sort((a, b) => a.id - b.id);
             s.style.borderStyle = "solid";
             s.style.borderWidth = "2px";
             s.style.borderColor = buffs[0].color;
 
-            // 2. Generar las sombras interiores (inset) espaciadas
             const shadowStyles = buffs.map((bufo, index) => {
-                // El primer bufo (borde) también tiene un brillo exterior suave
-                if (index === 0) {
-                    return `0 0 10px ${bufo.color}`;
-                }
-
-                // Lógica de espaciado para bufos 2, 3, 4... (index 1, 2, 3...)
-                // Aumentamos el desplazamiento ('offset') y reducimos el desenfoque ('blur')
-                // para que se vean como anillos nítidos hacia adentro.
-                
-                let offset = index * 4; // Desplaza 4px, 8px, 12px... hacia adentro
-                let blur = 8 - (index * 1.5); // Reduce desenfoque: 6.5px, 5px, 3.5px... (más nítido)
-                if (blur < 2) blur = 2; // Mínimo desenfoque
-
+                if (index === 0) return `0 0 10px ${bufo.color}`;
+                let offset = index * 4;
+                let blur   = 8 - (index * 1.5);
+                if (blur < 2) blur = 2;
                 return `inset 0 0 ${blur}px ${offset}px ${bufo.color}`;
             });
 
-            // Aplicar todas las sombras combinadas
             s.style.boxShadow = shadowStyles.join(", ");
         }
     });
